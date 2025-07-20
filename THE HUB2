@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanzania Health Evidence Hub (THE Hub)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles inspired by Banky's light theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #DFDFDF; /* Changed to DFDFDF */
+            color: #333333; /* Dark Gray for text */
+            transition: background-color 0.5s ease;
+            line-height: 1.6; /* Improved readability */
+        }
+
+        /* Custom container to match Banky's row padding */
+        .custom-container {
+            max-width: 106.25rem; /* Equivalent to 1700px */
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: calc(34.4px + 4.32941vw); /* Responsive padding */
+            padding-right: calc(34.4px + 4.32941vw);
+        }
+        @media(min-width:1700px){
+            .custom-container {
+                padding-left: 108px;
+                padding-right: 108px;
+            }
+        }
+        @media only screen and (max-width:1440px){
+            .custom-container {
+                padding-left: calc(23.6px + 1.78824vw);
+                padding-right: calc(23.6px + 1.78824vw);
+            }
+        }
+        @media only screen and (max-width:767px){
+            .custom-container {
+                padding-left: calc(20px + .94118vw);
+                padding-right: calc(20px + .94118vw);
+            }
+        }
+        @media only screen and (max-width:361px){
+            .custom-container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+
+        /* Color Palette & Backgrounds */
+        .bg-primary-light { background-color: #DFDFDF; } /* Changed to DFDFDF */
+        .bg-card-light { background-color: #FFFFFF; } /* Card/section background */
+        .bg-accent-blue { background-color: #1d63ff; } /* Banky's primary blue */
+        .bg-accent-green { background-color: #66BB6A; } /* Lighter Green for success/positive */
+        .bg-gradient-blue {
+            background: linear-gradient(135deg, #1d63ff 0%, #0040ff 100%);
+        }
+
+        /* Text Colors */
+        .text-primary-dark { color: #333333; } /* Main text color */
+        .text-secondary-dark { color: #555555; } /* Secondary text color */
+        .text-accent-blue { color: #1d63ff; } /* Banky's primary blue */
+        .text-accent-green { color: #66BB6A; } /* Lighter Green */
+        .text-white { color: #FFFFFF; }
+
+        /* Titles & Headings (Inspired by Banky's title styles) */
+        .section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem; /* Larger for impact */
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            color: #333333;
+            line-height: 1.1;
+        }
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Navigation Links */
+        .nav-link {
+            transition: color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Added transform and box-shadow */
+            position: relative;
+            padding-bottom: 4px;
+            color: #555555;
+            font-weight: 600;
+            cursor: pointer; /* Added cursor pointer */
+        }
+        .nav-link:hover {
+            color: #1d63ff; /* Blue on hover */
+            transform: translateY(-2px); /* Subtle lift */
+            box-shadow: 0 4px 8px rgba(29, 99, 255, 0.1); /* Subtle shadow */
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1d63ff; /* Blue underline */
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+
+        /* Buttons (Mimicking Banky's button styles) */
+        .btn {
+            padding: 0.8rem 2rem;
+            border-radius: 0.5rem; /* Slightly less rounded than pill */
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-blue {
+            background-color: #1d63ff;
+            color: white;
+            box-shadow: 0 4px 10px rgba(29, 99, 255, 0.3);
+        }
+        .btn-blue:hover {
+            background-color: #144ccb; /* Darker blue */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(29, 99, 255, 0.4);
+        }
+        .btn-white {
+            background-color: white;
+            color: #1d63ff;
+            border: 1px solid #1d63ff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-white:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .btn-transparent {
+            background-color: transparent;
+            color: #1d63ff;
+            border: 1px solid #1d63ff;
+            box-shadow: none;
+        }
+        .btn-transparent:hover {
+            background-color: rgba(29, 99, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: none;
+        }
+
+        /* Loader Styles */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #DFDFDF; /* Changed to DFDFDF */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 1s ease-out;
+            pointer-events: all;
+        }
+        .loader-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loader-spinner {
+            border: 8px solid rgba(0, 0, 0, 0.1); /* Lighter border */
+            border-top: 8px solid #1d63ff; /* Vibrant Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            color: #333333; /* Dark text */
+            margin-top: 1rem;
+        }
+
+        /* Service Cards */
+        .service-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            background-color: #FFFFFF;
+            color: #333333;
+            border: 1px solid #E0E0E0; /* Lighter border */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            background-color: #F8F8F8;
+        }
+        .service-card .text-3xl { /* Service card icons */
+            transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+        }
+        .service-card:hover .text-3xl {
+            transform: scale(1.2); /* Larger bubble */
+            color: #144ccb; /* Darker blue */
+            text-shadow: 0 0 10px rgba(29, 99, 255, 0.5); /* Glowing effect */
+        }
+        .service-card .plus-icon {
+            transition: transform 0.5s ease, color 0.3s ease;
+        }
+        .service-card:hover .plus-icon {
+            color: #144ccb; /* Darker blue */
+        }
+        .service-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out, padding 0.7s ease-in-out;
+            padding-top: 0;
+            padding-bottom: 0;
+            color: #555555;
+        }
+        .service-card.active .service-content {
+            max-height: 500px;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background-color: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Form Styles */
+        .form-input, .form-textarea, .form-select {
+            background-color: #FFFFFF;
+            border: 1px solid #CCCCCC;
+            color: #333333;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: #1d63ff;
+            box-shadow: 0 0 0 2px rgba(29, 99, 255, 0.2);
+        }
+        .form-select {
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23555555" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        }
+        .form-success-message {
+            background-color: #FFFFFF;
+            color: #66BB6A;
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Why Us Section Icons */
+        #why-us .text-center > div { /* Target the parent div of the icon for hover */
+            cursor: pointer; /* Added cursor pointer */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        #why-us .text-center > div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        #why-us .text-4xl { /* Target the icon directly */
+            transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+        }
+        #why-us .text-center > div:hover .text-4xl {
+            transform: scale(1.2);
+            color: #144ccb; /* Darker blue */
+            text-shadow: 0 0 10px rgba(29, 99, 255, 0.5);
+        }
+        #why-us .text-center > div:hover .text-accent-blue { /* Also change title color on hover */
+             color: #144ccb;
+        }
+
+
+        /* Culture Section Styles */
+        .culture-grid-item {
+            background-color: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer; /* Added cursor pointer */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative; /* For pseudo-elements */
+            overflow: hidden; /* For pseudo-elements */
+        }
+        .culture-grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .culture-grid-item p.text-xl { /* Culture section titles */
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .culture-grid-item:hover p.text-xl {
+            color: #144ccb; /* Darker blue */
+            transform: translateX(5px); /* Subtle slide */
+        }
+        .culture-grid-item::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(29,99,255,0.1) 0%, transparent 70%); /* Lighter blue accent */
+            border-radius: 50%;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: transform 0.5s ease;
+        }
+        .culture-grid-item:nth-child(even)::before {
+            background: radial-gradient(circle, rgba(102,187,106,0.1) 0%, transparent 70%); /* Lighter green accent */
+            top: auto;
+            bottom: -20px;
+            left: auto;
+            right: -20px;
+            transform: translate(50%, 50%);
+        }
+        .culture-grid-item:hover::before {
+            transform: scale(1.5) translate(-50%, -50%); /* Enlarge on hover */
+        }
+        .culture-grid-item:nth-child(even):hover::before {
+            transform: scale(1.5) translate(50%, 50%); /* Enlarge on hover */
+        }
+
+        /* Footer specific styles */
+        .footer-link {
+            color: #555555;
+            transition: color 0.3s ease, transform 0.2s ease;
+            cursor: pointer; /* Added cursor pointer */
+            display: inline-block; /* For transform to work */
+        }
+        .footer-link:hover {
+            color: #1d63ff;
+            transform: translateX(5px); /* Subtle slide for links */
+        }
+        .social-icon {
+            color: #555555;
+            transition: color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            display: inline-block; /* Ensure transform works */
+            cursor: pointer; /* Added cursor pointer */
+        }
+        .social-icon:hover {
+            color: #1d63ff;
+            transform: translateY(-3px) scale(1.1); /* More pronounced bubble */
+            box-shadow: 0 4px 8px rgba(29, 99, 255, 0.2);
+        }
+        .scroll-to-top-button {
+            background-color: #1d63ff;
+            box-shadow: 0 4px 10px rgba(29, 99, 255, 0.3);
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer; /* Added cursor pointer */
+        }
+        .scroll-to-top-button:hover {
+            background-color: #144ccb;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 15px rgba(29, 99, 255, 0.4);
+        }
+
+        /* Contact Section Icons and Links */
+        .contact .flex.items-center.space-x-4 { /* Target the parent flex container for hover */
+            cursor: pointer; /* Added cursor pointer */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .contact .flex.items-center.space-x-4:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        .contact .flex.items-center.space-x-4 div:first-child { /* Target the div containing the emoji */
+            transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+        }
+        .contact .flex.items-center.space-x-4:hover div:first-child {
+            transform: scale(1.2);
+            color: #144ccb; /* Darker blue */
+            text-shadow: 0 0 8px rgba(29, 99, 255, 0.5);
+        }
+        .contact .flex.items-center.space-x-4 a {
+            transition: color 0.3s ease;
+        }
+        .contact .flex.items-center.space-x-4:hover a {
+            color: #1d63ff; /* Blue on hover */
+        }
+
+
+        /* General text color adjustments for light theme */
+        .text-gray-300 { color: #666666; }
+        .text-gray-400 { color: #777777; }
+        .text-gray-500 { color: #888888; }
+        .text-gray-600 { color: #444444; }
+        .text-gray-700 { color: #333333; }
+        .border-gray-800 { border-color: #E0E0E0; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader-overlay" class="loader-overlay">
+        <div class="text-center">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">Loading THE Hub...</p>
+        </div>
+    </div>
+
+    <header class="bg-card-light shadow-md sticky top-0 z-50 border-b border-gray-800">
+        <nav class="custom-container px-6 py-4 flex justify-between items-center">
+            <a href="#" class="flex items-center">
+                <img src="THE_Hub_TREE.png" alt="THE_Hub_TREE.png" class="h-14">
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#about" class="nav-link">About</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#why-us" class="nav-link">Why Us?</a>
+                <a href="#culture" class="nav-link">Our Culture</a>
+                <a href="#contact" class="btn btn-blue">Contact Us</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 hover:text-accent-blue">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-card-light border-t border-gray-800">
+            <a href="#about" class="block py-3 px-6 text-sm text-gray-700 hover:bg-gray-100">About</a>
+            <a href="#services" class="block py-3 px-6 text-sm text-gray-700 hover:bg-gray-100">Services</a>
+            <a href="#why-us" class="block py-3 px-6 text-sm text-gray-700 hover:bg-gray-100">Why Us?</a>
+            <a href="#culture" class="block py-3 px-6 text-sm text-gray-700 hover:bg-gray-100">Our Culture</a>
+            <a href="#contact" class="block py-3 px-6 text-sm text-white bg-accent-blue hover:bg-opacity-90">Contact Us</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="py-24 md:py-40 bg-primary-light text-center border-b border-gray-800">
+            <div class="custom-container px-6">
+                 <img src="THE_Hub_TREE.png" alt="THE Hub Logo" class="h-32 mx-auto mb-8">
+                <h2 class="text-5xl md:text-7xl font-bold text-accent-blue mb-6 font-['Montserrat']">Tanzania Health Evidence Hub</h2>
+                <p class="text-xl md:text-2xl text-secondary-dark max-w-4xl mx-auto leading-relaxed">Your Partner in Research Excellence. We transform health research aspirations into impactful realities across Tanzania, guided by robust evidence.</p>
+                <div class="mt-10 flex justify-center space-x-4">
+                    <a href="#contact" class="btn btn-blue">Get Started</a>
+                    <a href="#services" class="btn btn-transparent">Learn More</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-20 bg-primary-light">
+            <div class="custom-container px-6">
+                <h3 class="section-title">Our Purpose</h3>
+                <p class="text-center text-lg text-secondary-dark max-w-3xl mx-auto -mt-6 mb-12">At THE Hub, we are driven by a clear vision to advance health through evidence and a mission to empower researchers across Tanzania.</p>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <h4 class="text-2xl font-bold text-accent-green mb-3 font-['Montserrat']">Our Vision</h4>
+                        <p class="text-primary-dark leading-relaxed">To be the leading catalyst for evidence-informed health advancements in Tanzania, fostering a healthier, more knowledgeable society through impactful research and strategic partnerships.</p>
+                    </div>
+                    <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <h4 class="text-2xl font-bold text-accent-green mb-3 font-['Montserrat']">Our Mission</h4>
+                        <p class="text-primary-dark leading-relaxed">To empower individuals and organizations in Tanzania to achieve their health research aspirations by providing expert, ethical, and timely consultancy services across the entire research lifecycle.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="py-20 bg-primary-light">
+            <div class="custom-container px-6">
+                <h3 class="section-title">Our Comprehensive Services</h3>
+                <p class="text-center text-lg text-secondary-dark max-w-3xl mx-auto -mt-6 mb-12">This section outlines the full spectrum of our services. We guide our clients through every stage of the research journey, from initial concept to final impact. Click on any service to learn more about how we can help you achieve your goals.</p>
+                <div id="services-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="why-us" class="py-20 bg-primary-light">
+            <div class="custom-container px-6">
+                <h3 class="section-title">Why Partner With THE Hub?</h3>
+                <p class="text-center text-lg text-secondary-dark max-w-3xl mx-auto -mt-6 mb-12">Our unique value proposition lies in our comprehensive approach, deep local expertise, and unwavering commitment to quality and ethics. We don't just provide services; we build strategic partnerships to ensure your research achieves its maximum potential and impact.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-center">
+                    <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <div class="text-4xl text-accent-green mb-4">🎯</div>
+                        <h4 class="text-xl font-bold mb-2 text-accent-blue">Full Research Lifecycle Support</h4>
+                        <p class="text-secondary-dark">From grant writing to publication, we offer end-to-end support, a unique offering in the Tanzanian market.</p>
+                    </div>
+                    <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <div class="text-4xl text-accent-green mb-4">🇹🇿</div>
+                        <h4 class="text-xl font-bold mb-2 text-accent-blue">Local Relevance, Global Standards</h4>
+                        <p class="text-secondary-dark">We combine a deep understanding of the Tanzanian context with international best practices for research.</p>
+                    </div>
+                    <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <div class="text-4xl text-accent-green mb-4">🤝</div>
+                        <h4 class="text-xl font-bold mb-2 text-accent-blue">Strategic Partnership Model</h4>
+                        <p class="text-secondary-dark">We work as a strategic partner to enhance your capacity and help you achieve long-term success.</p>
+                    </div>
+                     <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <div class="text-4xl text-accent-green mb-4">📈</div>
+                        <h4 class="text-xl font-bold mb-2 text-accent-blue">Capacity Building</h4>
+                        <p class="text-secondary-dark">We fill critical capacity gaps in grant applications, data analysis, and navigating publication standards.</p>
+                    </div>
+                     <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <div class="text-4xl text-accent-green mb-4">📜</div>
+                        <h4 class="text-xl font-bold mb-2 text-accent-blue">Ethical & Quality Commitment</h4>
+                        <p class="text-secondary-dark">We adhere to the highest ethical standards, aligning with national guidelines from NIMR and COSTECH.</p>
+                    </div>
+                     <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <div class="text-4xl text-accent-green mb-4">💡</div>
+                        <h4 class="text-xl font-bold mb-2 text-accent-blue">Underserved Niche Focus</h4>
+                        <p class="text-secondary-dark">Our services directly address the needs of researchers and organizations often overlooked by other firms.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="culture" class="py-20 bg-primary-light">
+            <div class="custom-container px-6">
+                <h3 class="section-title">Our Culture</h3>
+                <p class="text-center text-lg text-secondary-dark max-w-3xl mx-auto -mt-6 mb-12">Tanzania Health Evidence Hub was started by global entrepreneurs in Dar es Salaam who saw a lack of strategic insights offered by traditional health research support. We are your one-stop-shop for creating cutting-edge health research products that will increase engagement and add real value to your audience.</p>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                    <div class="culture-grid-item rounded-lg p-8">
+                        <p class="text-xl font-semibold text-accent-blue">Global Team, Local Impact</p>
+                        <p class="text-primary-dark mt-2">Our diverse team brings increased creativity and innovation, ensuring solutions are globally informed and locally relevant.</p>
+                    </div>
+                    <div class="culture-grid-item rounded-lg p-8">
+                        <p class="text-xl font-semibold text-accent-blue">Unconventional Thinking</p>
+                        <p class="text-primary-dark mt-2">We think unconventionally to create cutting-edge solutions that push the boundaries of health research.</p>
+                    </div>
+                    <div class="culture-grid-item rounded-lg p-8">
+                        <p class="text-xl font-semibold text-accent-blue">Quality Relationships</p>
+                        <p class="text-primary-dark mt-2">Our goal is to build trust and quality relationships, fostering long-term partnerships with our clients.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20 bg-primary-light">
+            <div class="custom-container px-6">
+                <h3 class="section-title">Get in Touch</h3>
+                <div class="space-y-12 max-w-4xl mx-auto">
+                    <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                         <h4 class="text-2xl font-bold text-accent-green mb-4 font-['Montserrat'] text-center">Click the button below to start your research journey.</h4>
+                         <div class="text-center mb-6">
+                             <a href="https://docs.google.com/forms/d/e/1FAIpQLSeXZAV7QD4pXSVwL3WhGdY0PIIpOU-81AasJ0Gcpq6qZ9CQTQ/viewform?usp=header" target="_blank" class="btn btn-blue">Start Your Journey</a>
+                        </div>
+                        <div id="formSuccessMessage" class="form-success-message hidden rounded-lg">
+                            <p>Success! We are reviewing your message and will get back to you shortly.</p>
+                        </div>
+                    </div>
+                    <div class="bg-card-light p-8 rounded-lg shadow-md border border-gray-800">
+                        <h4 class="text-xl font-bold text-accent-blue mb-4 font-['Montserrat'] text-center">Contact Information</h4>
+                        <div class="space-y-4 mb-8 text-center">
+                            <div class="flex items-center space-x-4 justify-center">
+                               <div class="text-2xl text-accent-blue">📞</div>
+                               <div>
+                                   <p class="font-semibold text-primary-dark">Phone / WhatsApp</p>
+                                   <a href="https://wa.me/255753121200" target="_blank" class="text-secondary-dark hover:text-accent-green transition">📞 +255 753 121 200</a>
+                               </div>
+                            </div>
+                             <div class="flex items-center space-x-4 justify-center">
+                               <div class="text-2xl text-accent-blue">📧</div>
+                               <div>
+                                   <p class="font-semibold text-primary-dark">Email</p>
+                                   <a href="mailto:info@thehub.co.tz" class="text-secondary-dark hover:text-accent-green transition">📧 info@thehub.co.tz</a>
+                               </div>
+                            </div>
+                             <div class="flex items-center space-x-4 justify-center">
+                               <div class="text-2xl text-accent-blue">📍</div>
+                               <div>
+                                   <p class="font-semibold text-primary-dark">Address</p>
+                                   <p class="text-secondary-dark">📍 Dar es Salaam, Tanzania (Prospective)</p>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-card-light text-primary-dark border-t border-gray-800 py-12">
+        <div class="custom-container px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-1">
+                <a href="#" class="flex items-center mb-4">
+                     <img src="THE_Hub_TREE.png" alt="THE Hub Logo" class="h-12">
+                </a>
+                <p class="text-secondary-dark text-sm">&copy; 2025 Tanzania Health Evidence Hub (THE Hub). All Rights Reserved.</p>
+            </div>
+
+            <div class="col-span-1">
+                <h4 class="font-bold text-primary-dark mb-4">Quick Links</h4>
+                <ul class="space-y-2">
+                    <li><a href="#about" class="footer-link">About Us</a></li>
+                    <li><a href="#services" class="footer-link">Our Services</a></li>
+                    <li><a href="#why-us" class="footer-link">Why Choose Us</a></li>
+                    <li><a href="#contact" class="footer-link">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-span-1">
+                <h4 class="font-bold text-primary-dark mb-4">Stay in the Know</h4>
+                <p class="text-secondary-dark text-sm mb-4">Subscribe for updates and insights.</p>
+                <form id="subscribeForm" class="flex flex-col space-y-3">
+                    <input type="email" id="subscribeEmail" placeholder="Enter your email" class="form-input text-sm rounded-md" required>
+                    <button type="submit" class="btn btn-blue self-start text-sm px-4 py-2">Subscribe</button>
+                </form>
+                <div id="subscribeSuccessMessage" class="text-accent-green text-sm mt-2 hidden">Subscribed successfully!</div>
+            </div>
+
+            <div class="col-span-1">
+                <h4 class="font-bold text-primary-dark mb-4">Connect With Us</h4>
+                <div class="flex space-x-4 mb-4">
+                    <a href="https://linkedin.com/company/thehub" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-icon">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="https://twitter.com/thehub" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-icon">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://facebook.com/thehub" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="social-icon">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="https://instagram.com/thehub" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+                <div class="text-secondary-dark text-sm">
+                    <p>Dar es Salaam Time:</p>
+                    <p id="darEsSalaamTime" class="font-semibold text-accent-blue text-lg"></p>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button id="scrollToTopBtn" class="scroll-to-top-button">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Loader functionality
+            const loaderOverlay = document.getElementById('loader-overlay');
+            setTimeout(() => {
+                loaderOverlay.classList.add('hidden');
+            }, 1500); // Hide loader after 1.5 seconds
+
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Smooth Scrolling & Active Nav Link
+            const navLinks = document.querySelectorAll('a[href^="#"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let targetId = this.getAttribute('href');
+                    let targetElement = document.querySelector(targetId);
+                    if(targetElement){
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80, // Adjust for sticky header
+                            behavior: 'smooth'
+                        });
+                        // Close mobile menu on click
+                        if(!mobileMenu.classList.contains('hidden')){
+                           mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+
+            const sections = document.querySelectorAll('section');
+            const allNavLinks = document.querySelectorAll('nav a');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 90) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                allNavLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') == `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // Services Data and Rendering
+            const servicesData = [
+                {
+                    title: "Competitive Grant Writing",
+                    icon: "🏆",
+                    content: "This service involves assisting researchers and institutions in identifying relevant funding opportunities, both local and international. THE Hub will specialize in developing compelling, well-structured, and technically sound grant proposals that precisely align with funder requirements and national health priorities, such as those identified by NIMR. Strategic advice on grant application processes and meticulous budget development will also be provided to maximize success rates."
+                },
+                {
+                    title: "Research Proposals (Qualitative & Quantitative)",
+                    icon: "🔬",
+                    content: "THE Hub will guide clients through the conceptualization and design of various research studies. This includes developing comprehensive research protocols, detailing methodology, sampling strategies, data collection tools, and crucial ethical considerations. A key aspect of this service is ensuring that proposals meet the rigorous standards required for ethical review by bodies such as NIMR's National Health Research Ethics sub-Committee (NatHREC), which is essential for research approval in Tanzania."
+                },
+                {
+                    title: "Data Analysis and Report Writing",
+                    icon: "📊",
+                    content: "Expert statistical analysis will be provided for quantitative data, alongside thematic analysis for qualitative data. THE Hub will utilize appropriate software and methodologies, drawing on best practices in data management, similar to Epimat's use of Open Data Kit. Complex findings will be translated into clear, concise, and impactful reports suitable for diverse audiences, including policymakers, academic journals, and community stakeholders, ensuring that research insights are accessible and actionable."
+                },
+                {
+                    title: "Manuscript Preparation for Publication",
+                    icon: "✍️",
+                    content: "This service assists researchers in structuring and writing scientific manuscripts in accordance with target journal guidelines. The focus will be on ensuring adherence to academic standards, clarity of presentation, and logical flow of arguments. Critical review and editing will be provided to enhance manuscript quality, significantly increasing the likelihood of publication in reputable journals."
+                },
+                {
+                    title: "Publication Process Aid",
+                    icon: "🚀",
+                    content: "THE Hub will guide clients through the intricate journal selection process, submission procedures, and the crucial stage of responding to peer review comments. Support will also be offered in navigating ethical considerations related to authorship and data sharing, ensuring compliance and integrity. Ultimately, this service aims to facilitate the effective dissemination of research findings to relevant scientific and public audiences."
+                },
+                {
+                    title: "Monitoring and Evaluation (M&E) Consultancy",
+                    icon: "📋",
+                    content: "This service involves designing robust M&E frameworks for health projects and programs. This includes developing appropriate indicators, designing data collection tools, and establishing efficient data management systems. THE Hub will conduct baseline, mid-term, and end-line evaluations to rigorously assess project effectiveness and impact, providing evidence-based recommendations for program improvement and accountability to funders and beneficiaries."
+                },
+                {
+                    title: "Other Research and Project Activities",
+                    icon: "🛠️",
+                    content: "This broad category encompasses bespoke services tailored to specific client needs. These may include conducting comprehensive literature reviews, organizing and delivering research capacity-building workshops (aligning with NIMR's and NGOs' focus on training and strengthening research capabilities), developing strategic research dissemination plans, and providing specialized technical assistance for unique research or project challenges."
+                }
+            ];
+
+            const servicesGrid = document.getElementById('services-grid');
+            servicesData.forEach(service => {
+                const card = document.createElement('div');
+                card.className = 'service-card bg-white rounded-lg shadow-lg overflow-hidden';
+                card.innerHTML = `
+                    <div class="p-6 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-4">${service.icon}</span>
+                            <h4 class="text-xl font-bold text-accent-blue">${service.title}</h4>
+                        </div>
+                        <div class="plus-icon text-2xl text-accent-green font-light transform transition-transform duration-500">+</div>
+                    </div>
+                    <div class="service-content px-6">
+                        <p>${service.content}</p>
+                    </div>
+                `;
+                servicesGrid.appendChild(card);
+            });
+
+            // Service Card Interaction
+            const serviceCards = document.querySelectorAll('.service-card');
+            serviceCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Close other cards
+                    serviceCards.forEach(otherCard => {
+                        if (otherCard !== card && otherCard.classList.contains('active')) {
+                            otherCard.classList.remove('active');
+                            otherCard.querySelector('.plus-icon').style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    // Toggle current card
+                    card.classList.toggle('active');
+                    const plusIcon = card.querySelector('.plus-icon');
+                    if (card.classList.contains('active')) {
+                        plusIcon.style.transform = 'rotate(45deg)';
+                    } else {
+                        plusIcon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+
+            // Contact Form Submission
+            const contactForm = document.getElementById('contactForm');
+            const formSuccessMessage = document.getElementById('formSuccessMessage');
+
+            contactForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                // In a real application, you would send this data to a server
+                // For this example, we'll just simulate success
+                console.log('Form submitted!');
+                // You can access form data like this:
+                // const formData = new FormData(contactForm);
+                // console.log(Object.fromEntries(formData.entries()));
+
+                contactForm.reset(); // Clear the form fields
+                contactForm.classList.add('hidden'); // Hide the form
+                formSuccessMessage.classList.remove('hidden'); // Show success message
+
+                // Optionally hide success message after a few seconds
+                setTimeout(() => {
+                    formSuccessMessage.classList.add('hidden');
+                    contactForm.classList.remove('hidden');
+                }, 5000); // Hide after 5 seconds
+            });
+
+            // Subscribe Form Submission
+            const subscribeForm = document.getElementById('subscribeForm');
+            const subscribeSuccessMessage = document.getElementById('subscribeSuccessMessage');
+
+            subscribeForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                console.log('Subscribe form submitted!');
+                const emailInput = document.getElementById('subscribeEmail');
+                console.log('Email:', emailInput.value);
+
+                emailInput.value = ''; // Clear the input
+                subscribeSuccessMessage.classList.remove('hidden'); // Show success message
+
+                setTimeout(() => {
+                    subscribeSuccessMessage.classList.add('hidden');
+                }, 3000);
+            });
+
+            // Dar es Salaam Time Clock
+            function updateDarEsSalaamTime() {
+                const now = new Date();
+                // EAT (East Africa Time) is UTC+3
+                const options = {
+                    timeZone: 'Africa/Dar_es_Salaam',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                };
+                const darEsSalaamTime = now.toLocaleTimeString('en-US', options);
+                document.getElementById('darEsSalaamTime').textContent = darEsSalaamTime;
+            }
+
+            updateDarEsSalaamTime(); // Initial call
+            setInterval(updateDarEsSalaamTime, 1000); // Update every second
+
+            // Scroll to Top Button
+            const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) { // Show button after scrolling down 300px
+                    scrollToTopBtn.classList.remove('hidden');
+                } else {
+                    scrollToTopBtn.classList.add('hidden');
+                }
+            });
+
+            scrollToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoIF2x8K0C2D3qW8d7f/zJz2p+0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</body>
+</html>
